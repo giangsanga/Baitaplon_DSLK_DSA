@@ -1,92 +1,141 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 typedef struct data{
     char ten[30];
     int namsinh;
 }data;
 typedef struct node{
     data thongtin;
-    struct node *cha;   
+    struct node *Cha;
     struct node *anhChiEm;
-    struct node *con;
+    struct node *Con;
+    struct node *next;
+    struct node *prev;
 }node;
-typedef struct Danhsach{
-    node *first;
-    node *last;
-}DList;
-void init(DList *l){
-    l->first = NULL;
-    l->last = NULL;
+typedef struct list{
+    struct node *first;
+    struct node *last;
+}Dlist;
+void init(Dlist &l){
+    l.first = NULL;
+    l.last = NULL;
 }
-node *createNode(data thongtin){
-    node *newnode = (node*)malloc(sizeof(node));
-    if(newnode == NULL){
+node *CreateNode(data x){
+    node *newNode = (node*)malloc(sizeof(node));
+    if (newNode == NULL){
         printf("Khong du bo nho!\n");
         exit(1);
     }
-    newnode->thongtin = thongtin;
-    newnode->cha = NULL;
-    newnode->anhChiEm = NULL;
-    newnode->con = NULL;
-    return newnode;
+    newNode->thongtin = x;
+    newNode->Cha = NULL;
+    newNode->anhChiEm = NULL;
+    newNode->Con = NULL;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    return newNode;
 }
-void addThanhvienfirst(DList &list, node* new_node){
-    if(list.first == NULL){
-        list.first = new_node;
-        list.last = new_node;
+void AddLastNode(Dlist &l, node *newNode){
+    if (l.first == NULL){
+        l.first = newNode;
+        l.last = newNode;
     }else{
-        new_node->con = list.first;
-        list.first->cha = new_node;
-        list.first = new_node;
+        l.last->next = newNode;
+        newNode->prev = l.last;
+        l.last = newNode;
     }
 }
-void insertTVfirst(DList &list, data thongtin){//Them thanh vien vao dau danh sach lien ket
-    node *new_node = createNode(thongtin);
-    if(new_node == NULL) return;
-    else{
-        addThanhvienfirst(list, new_node);
+void InsertLast(Dlist &l, data x){//Them vao cuoi danh sach
+    node *newNode = CreateNode(x);
+    if (newNode == NULL){
+        return;
+    }else{
+        AddLastNode(l, newNode);
     }
 }
-void themThanhvien(DList &list){
-    data thongtin;
-    printf("Nhap ten: ");
+void themThanhVien(Dlist &l){
+    data x;
+    printf("Nhap ten thanh vien: ");
     fflush(stdin);
-    gets(thongtin.ten);
+    gets(x.ten);
     printf("Nhap nam sinh: ");
-    scanf("%d", &thongtin.namsinh);
-    if(&list == NULL){
-        printf("Chua co danh sach thanh vien\n");
-        printf("Them thanh vien dau tien\n");
-        insertTVfirst(list, thongtin);
-    }else{
-        insertTVfirst(list, thongtin);
+    scanf("%d", &x.namsinh);
+    InsertLast(l, x);
+}
+void themCon(Dlist &l){
+    data x;
+    printf("Nhap ten con: ");
+    fflush(stdin);
+    gets(x.ten);
+    printf("Nhap nam sinh: ");
+    scanf("%d", &x.namsinh);
+    printf("Nhap ten cha: ");
+    char tenCha[30];
+    fflush(stdin);
+    gets(tenCha);
+    node *p = l.first;
+    while (p != NULL){
+        if (strcmp(p->thongtin.ten, tenCha) == 0){
+            node *newNode = CreateNode(x);
+            InsertLast(l, x);
+            newNode->Cha = p;
+            if (p->Con == NULL){
+                p->Con = newNode;
+            }
+        }
+        p = p->next;
     }
 }
-// void duyet(list *l){
-//     node *temp = l->first;
-//     while(temp != NULL){
-//         printf("Ten: %s\n", temp->thongtin.ten);
-//         printf("Nam sinh: %d\n", temp->thongtin.namsinh);
-//         temp = temp->con;
-//     }
-// }
-int main(){
-    DList list;
-    init(&list);
-    data thongtin;
-    int n;
-    int choice;
-    while(1){
-        printf("1. Them thanh vien\n");
-        printf("2. Tim va hien thi thong tin thanh vien\n");
-        printf("3. Hien Danh sach thanh vien\n");
-        printf("0. Thoat\n");
-        int choice = 0;
-        printf("Chon: ");
-        scanf("%d", &choice);
-        switch(choice){
-            case 1:
-
+void Display(Dlist l){
+    node *p = l.first;
+    while (p != NULL){
+        printf("Ten: %s\n", p->thongtin.ten);
+        printf("Nam sinh: %d\n", p->thongtin.namsinh);
+        node *q = p->Con;
+        while(q != NULL){
+            printf("Con: %s\n", q->thongtin.ten);
+            q = q->next;
         }
+        printf("\n");
+        p = p->next;
     }
+}
+int menu(Dlist &l){
+    printf("1. Them thanh vien\n");
+    printf("2. Them con\n");
+    printf("3. Hien thi danh sach\n");
+    printf("0. Thoat\n");
+    int choice;
+    int flag = 0;
+    scanf("%d", &choice);
+    switch(choice){
+        case 1:
+            themThanhVien(l);
+            flag = 1;
+            break;
+        case 2:
+            themCon(l);
+            flag = 1;
+            printf("\n");
+            break;
+        case 3:
+            Display(l);
+            flag = 1;
+            printf("\n");
+            break;
+        case 0:
+            flag = 0;
+            break;
+        default:
+            flag = 1;
+            break;
+    }
+}
+int main(){
+    Dlist l;
+    init(l);
+    while(1){
+        if(menu(l) == 0) break;
+    }
+    return 0;
 }
