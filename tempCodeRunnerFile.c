@@ -1,0 +1,2 @@
+   // nguoi *pre;
+    // nguoi *next;
